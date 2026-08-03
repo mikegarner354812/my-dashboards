@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross Harp Blues Scale — Blues Theory Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #eef1ea;
+    --bg-panel: #ffffff;
+    --text: #1e2a24;
+    --text-dim: #5b6b62;
+    --text-faint: #93a099;
+    --brass: #8a6a12;
+    --brass-bright: #a9821c;
+    --brass-glow: rgba(169,130,28,0.12);
+    --rule: #d9ddd3;
+
+    --box-border: #24242a;
+    --bar: #c3c67a;
+    --bar-dark: #2b2a3a;
+
+    --h-bend: 68px;
+    --h-blow: 68px;
+    --h-badge: 68px;
+    --h-draw: 68px;
+    --h-bendrow: 68px;
+    --bar-h: 30px;
+    --badge-gap: 8px;
+    --bar-overhang: 18px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(138,106,18,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap{ max-width: 1100px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:24px;
+    padding-bottom:28px;
+    margin-bottom:32px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:42px;
+    line-height:1;
+    margin:0 0 8px;
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:460px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .key-picker{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:200px;
+  }
+  .key-picker label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  select{
+    appearance:none;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    color: var(--brass-bright);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:20px;
+    padding:10px 40px 10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow: 0 1px 2px rgba(30,42,36,0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a12' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- Result strip ---------- */
+  .result{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:36px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+  }
+  .result-cell{ padding:22px 26px; }
+  .result-cell + .result-cell{ border-left:1px solid var(--rule); }
+  .result-label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    margin:0 0 8px;
+  }
+  .result-value{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:30px;
+    color:var(--brass-bright);
+    margin:0 0 4px;
+    line-height:1.1;
+  }
+  .result-sub{
+    font-size:12.5px;
+    color:var(--text-dim);
+    line-height:1.5;
+    margin:0;
+  }
+
+  /* ---------- Chart ---------- */
+  .chart-area{ padding: 36px var(--bar-overhang) 20px; }
+
+  .harp-grid{
+    position:relative;
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    column-gap: 1.4vw;
+    width:100%;
+  }
+
+  .hole-col{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    min-width:0;
+  }
+
+  .box{
+    width:100%;
+    height:var(--h-bend);
+    background: var(--bg);
+    border:1.4px solid var(--box-border);
+    margin-top:-1.4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    text-align:center;
+  }
+  .hole-col > .box:first-child{ margin-top:0; }
+
+  .box.blow{ height:var(--h-blow); }
+  .box.drawn{ height:var(--h-draw); }
+  .box.bend{ height:var(--h-bendrow); }
+  .box.empty{ background:transparent; border-color:transparent; }
+
+  .box .note{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(12px, 1.6vw, 18px);
+    color: var(--text-faint);
+  }
+  .box .deg{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    font-size:clamp(12px, 1.6vw, 18px);
+    letter-spacing:0.02em;
+    color: var(--text-faint);
+  }
+
+  .box.match{
+    background: var(--brass-glow);
+    border-color: var(--brass-bright);
+  }
+  .box.match .note{ color: var(--brass-bright); }
+  .box.match .deg{ color: var(--brass-bright); }
+
+  /* number cells match the note cells in width and height, with a small gap on either side */
+  .badge{
+    width:100%;
+    height:var(--h-badge);
+    margin-top: var(--badge-gap);
+    position:relative;
+    z-index:3;
+    background:#ffffff;
+    border:1.4px solid var(--box-border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(14px, 1.8vw, 20px);
+    color:#1a1a1a;
+  }
+  .badge + .box{ margin-top: var(--badge-gap); }
+
+  .bar-track{
+    position:absolute;
+    left: calc(-1 * var(--bar-overhang));
+    right: calc(-1 * var(--bar-overhang));
+    top: calc(var(--h-bend) + var(--h-blow) + var(--badge-gap) + (var(--h-badge) / 2));
+    transform: translateY(-50%);
+    height:var(--bar-h);
+    background: var(--bar);
+    border:2px solid var(--bar-dark);
+    z-index:1;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:22px;
+    margin: 26px 4px 8px;
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:7px; }
+  .swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .sw-match{ background:var(--brass-glow); border:1.5px solid var(--brass-bright); }
+  .sw-plain{ background:var(--bg); border:1.4px solid var(--box-border); }
+
+  footer{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+    margin-top:44px;
+    letter-spacing:0.04em;
+  }
+
+  @media (max-width:640px){
+    h1{ font-size:32px; }
+    header{ align-items:flex-start; }
+    .result{ grid-template-columns: 1fr; }
+    .result-cell + .result-cell{ border-left:none; border-top:1px solid var(--rule); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Blues Theory Reference</p>
+      <h1>Cross Harp Blues Scale</h1>
+      <p class="subtitle">Pick the key you want to play blues in. Everything blanks out except the extended blues scale — hole 1 blow through hole 6 blow — with each cell labeled by note and scale degree.</p>
+    </div>
+    <div class="key-picker">
+      <label for="keySelect">Blues key (2nd position)</label>
+      <select id="keySelect"></select>
+    </div>
+  </header>
+
+  <div class="result" id="result"></div>
+
+  <div class="chart-area">
+    <div class="harp-grid" id="harpGrid"></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="swatch sw-match"></i>in the blues scale (note / degree)</span>
+    <span><i class="swatch sw-plain"></i>reed exists, not in this scale</span>
+  </div>
+
+  <footer>mike's music project — cross harp blues scale reference</footer>
+</div>
+
+<script>
+  // CHROM index doubles as semitone value: C=0, Db=1, D=2 ... B=11
+  const CHROM = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+  // Richter harmonica template, offsets in semitones from the harmonica's own root (blow 1 = 0)
+  // inRange marks cells within "hole 1 blow through hole 6 blow"
+  const TEMPLATE = [
+    { num:1,  topBend:null, blow:0,  draw:2,  bends:[1],        rangeDraw:true,  rangeBend:true  },
+    { num:2,  topBend:null, blow:4,  draw:7,  bends:[6,5],      rangeDraw:true,  rangeBend:true  },
+    { num:3,  topBend:null, blow:7,  draw:11, bends:[10,9,8],   rangeDraw:true,  rangeBend:true  },
+    { num:4,  topBend:3,    blow:0,  draw:2,  bends:[1],        rangeDraw:true,  rangeBend:true  },
+    { num:5,  topBend:6,    blow:4,  draw:5,  bends:[],         rangeDraw:true,  rangeBend:true  },
+    { num:6,  topBend:10,   blow:7,  draw:9,  bends:[8],        rangeDraw:false, rangeBend:false },
+    { num:7,  topBend:null, blow:0,  draw:11, bends:[1],        rangeDraw:false, rangeBend:false },
+    { num:8,  topBend:3,    blow:4,  draw:2,  bends:[],         rangeDraw:false, rangeBend:false },
+    { num:9,  topBend:6,    blow:7,  draw:5,  bends:[8],        rangeDraw:false, rangeBend:false },
+    { num:10, topBend:10,   blow:0,  draw:9,  bends:[1],        rangeDraw:false, rangeBend:false }
+  ];
+  const TOPBEND_RANGE_MAX_HOLE = 6;
+  // 3 blow is the same pitch class as 2 draw (the root), but cross harp players use 2 draw for it —
+  // so 3 blow is deliberately left blank even though it would otherwise match.
+  const BLOW_OVERRIDE_BLANK = [3];
+  // the range stops at 6 blow's native note — its overblow (topBend) is excluded even if it would match.
+  const TOPBEND_OVERRIDE_BLANK = [6];
+
+  const BLUES_DEGREES = [
+    { semi:0,  label:'1'  },
+    { semi:3,  label:'b3' },
+    { semi:5,  label:'4'  },
+    { semi:6,  label:'b5' },
+    { semi:7,  label:'5'  },
+    { semi:10, label:'b7' }
+  ];
+
+  const maxBends = Math.max(...TEMPLATE.map(h => h.bends.length));
+
+  const sel = document.getElementById('keySelect');
+  const resultEl = document.getElementById('result');
+  const gridEl = document.getElementById('harpGrid');
+
+  function degreeFor(noteIdx, keyIdx){
+    const rel = (noteIdx - keyIdx + 12) % 12;
+    const d = BLUES_DEGREES.find(d => d.semi === rel);
+    return d ? d.label : null;
+  }
+
+  function cellHTML(noteIdx, keyIdx, inRange, extraClass){
+    const label = inRange ? degreeFor(noteIdx, keyIdx) : null;
+    const cls = label ? 'match' : '';
+    const inner = label
+      ? `<span class="note">${CHROM[noteIdx]}</span><span class="deg">${label}</span>`
+      : '';
+    return `<div class="box ${extraClass} ${cls}">${inner}</div>`;
+  }
+
+  function render(key){
+    const kIdx = CHROM.indexOf(key);
+    const hIdx = (kIdx - 7 + 12) % 12; // harmonica key = IV of the target key
+    const hKey = CHROM[hIdx];
+
+    resultEl.innerHTML = `
+      <div class="result-cell">
+        <p class="result-label">Pick up your</p>
+        <p class="result-value">${hKey} harmonica</p>
+        <p class="result-sub">Play it in 2nd position (cross harp) to land in ${key}.</p>
+      </div>
+      <div class="result-cell">
+        <p class="result-label">Extended blues scale in</p>
+        <p class="result-value">${key}</p>
+        <p class="result-sub">1 &nbsp;·&nbsp; b3 &nbsp;·&nbsp; 4 &nbsp;·&nbsp; b5 &nbsp;·&nbsp; 5 &nbsp;·&nbsp; b7 — hole 1 blow to hole 6 blow</p>
+      </div>
+    `;
+
+    let html = `<div class="bar-track"></div>`;
+
+    TEMPLATE.forEach(h => {
+      const topBendInRange = h.topBend !== null && h.num <= TOPBEND_RANGE_MAX_HOLE && !TOPBEND_OVERRIDE_BLANK.includes(h.num);
+      const blowInRange = h.num <= TOPBEND_RANGE_MAX_HOLE && !BLOW_OVERRIDE_BLANK.includes(h.num);
+
+      html += `<div class="hole-col">`;
+
+      html += h.topBend !== null
+        ? cellHTML((hIdx + h.topBend) % 12, kIdx, topBendInRange, 'bend')
+        : `<div class="box empty"></div>`;
+
+      html += cellHTML((hIdx + h.blow) % 12, kIdx, blowInRange, 'blow');
+
+      html += `<div class="badge">${h.num}</div>`;
+
+      html += cellHTML((hIdx + h.draw) % 12, kIdx, h.rangeDraw, 'drawn');
+
+      for(let b=0; b<maxBends; b++){
+        if(b < h.bends.length){
+          html += cellHTML((hIdx + h.bends[b]) % 12, kIdx, h.rangeBend, 'bend');
+        } else {
+          html += `<div class="box empty"></div>`;
+        }
+      }
+
+      html += `</div>`;
+    });
+
+    gridEl.innerHTML = html;
+  }
+
+  CHROM.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    sel.appendChild(opt);
+  });
+  sel.value = 'G';
+  sel.addEventListener('change', () => render(sel.value));
+
+  render('G');
+</script>
+</body>
+</html>
