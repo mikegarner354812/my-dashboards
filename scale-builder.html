@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scale Builder — Blues Theory Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #eef1ea;
+    --bg-panel: #ffffff;
+    --bg-panel-2: #f5f7f1;
+    --hole: #ffffff;
+    --text: #1e2a24;
+    --text-dim: #5b6b62;
+    --text-faint: #93a099;
+    --brass: #8a6a12;
+    --brass-bright: #a9821c;
+    --flat: #a8452c;
+    --removed: #9aa39c;
+    --added: #2f7a63;
+    --added-glow: rgba(47,122,99,0.16);
+    --rule: #d9ddd3;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(138,106,18,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:24px;
+    padding-bottom:28px;
+    margin-bottom:36px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:42px;
+    line-height:1;
+    margin:0 0 8px;
+    color:var(--text);
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:440px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .key-picker{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:180px;
+  }
+  .key-picker label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  select{
+    appearance:none;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    color: var(--brass-bright);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:20px;
+    padding:10px 40px 10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow: 0 1px 2px rgba(30,42,36,0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a12' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- Rows ---------- */
+  .row{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items:center;
+  }
+  .row:last-of-type{ border-bottom:none; }
+
+  .row-label .step{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color: var(--text-faint);
+    margin:0 0 4px;
+    letter-spacing:0.02em;
+  }
+  .row-label h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 10px;
+    color:var(--text);
+  }
+  .formula{
+    display:inline-block;
+    font-size:12.5px;
+    font-weight:600;
+    color: var(--brass-bright);
+    background: rgba(138,106,18,0.08);
+    border:1px solid rgba(138,106,18,0.3);
+    border-radius:4px;
+    padding:4px 8px;
+    letter-spacing:0.03em;
+    margin-bottom:10px;
+  }
+  .caption{
+    font-size:12px;
+    line-height:1.5;
+    color:var(--text-dim);
+    max-width:210px;
+  }
+
+  /* ---------- Tile grid (harmonica comb) ---------- */
+  .comb{
+    background: var(--bg-panel-2);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:14px;
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap:8px;
+  }
+
+  .tile{
+    aspect-ratio: 1 / 1.18;
+    border-radius:7px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    position:relative;
+  }
+
+  .tile--empty{ background:transparent; }
+
+  .tile--plain{
+    background: var(--hole);
+    border:1px solid var(--rule);
+  }
+  .tile--plain .note{ color: var(--text); }
+
+  .tile--flat{
+    background: var(--hole);
+    border:1px solid var(--flat);
+    box-shadow: inset 0 0 0 1px rgba(168,69,44,0.1);
+  }
+  .tile--flat .note{ color: var(--flat); }
+  .tile--flat .deg{ color: var(--flat); }
+
+  .tile--removed{
+    background: transparent;
+    border:1px dashed var(--removed);
+    opacity:0.7;
+  }
+  .tile--removed .note{
+    color: var(--removed);
+    text-decoration: line-through;
+    text-decoration-color: var(--removed);
+  }
+  .tile--removed .deg{ color: var(--removed); }
+
+  .tile--added{
+    background: var(--hole);
+    border:1px solid var(--added);
+    box-shadow: 0 0 0 3px var(--added-glow);
+  }
+  .tile--added .note{ color: var(--added); }
+  .tile--added .deg{ color: var(--added); }
+  .tile--added::after{
+    content:"NEW";
+    position:absolute;
+    top:-9px;
+    font-size:8px;
+    letter-spacing:0.08em;
+    background: var(--added);
+    color:#ffffff;
+    padding:1px 5px;
+    border-radius:3px;
+    font-weight:700;
+  }
+
+  .note{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    line-height:1;
+  }
+  .deg{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:21px;
+    font-weight:700;
+    color: var(--text);
+    letter-spacing:0.01em;
+    line-height:1;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin: 30px 0 44px;
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:7px; }
+  .swatch{ width:11px; height:11px; border-radius:3px; display:inline-block; }
+  .sw-plain{ background:var(--hole); border:1px solid var(--rule); }
+  .sw-flat{ background:var(--hole); border:1px solid var(--flat); }
+  .sw-removed{ background:transparent; border:1px dashed var(--removed); }
+  .sw-added{ background:var(--hole); border:1px solid var(--added); box-shadow:0 0 0 2px var(--added-glow); }
+
+  /* ---------- Cheat strip ---------- */
+  .cheat{
+    margin-top: 20px;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:22px 26px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+  }
+  .cheat-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--brass-bright);
+    margin:0 0 14px;
+  }
+  .cheat ol{
+    margin:0;
+    padding-left:20px;
+    color:var(--text);
+    font-size:13.5px;
+    line-height:2;
+  }
+  .cheat b{ color:var(--brass-bright); }
+
+  footer{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+    margin-top:40px;
+    letter-spacing:0.04em;
+  }
+
+  @media (max-width:640px){
+    .row{ grid-template-columns: 1fr; gap:14px; }
+    h1{ font-size:32px; }
+    .deg{ font-size:17px; }
+    header{ align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Blues Theory Reference</p>
+      <h1>Scale Builder</h1>
+      <p class="subtitle">Major → Natural Minor → Minor Pentatonic → Blues. Same eight degree-slots, every row — watch what stays, what flattens, what gets cut, and what gets added back.</p>
+    </div>
+    <div class="key-picker">
+      <label for="keySelect">Key</label>
+      <select id="keySelect"></select>
+    </div>
+  </header>
+
+  <div id="rows"></div>
+
+  <div class="legend">
+    <span><i class="swatch sw-plain"></i>unchanged</span>
+    <span><i class="swatch sw-flat"></i>flatted</span>
+    <span><i class="swatch sw-removed"></i>removed</span>
+    <span><i class="swatch sw-added"></i>added (the blue note)</span>
+  </div>
+
+  <div class="cheat">
+    <p class="cheat-title">The four-line version</p>
+    <ol>
+      <li><b>Major scale</b> = W W H W W W H</li>
+      <li><b>Minor</b> = flat the ♭3 ♭6 ♭7</li>
+      <li><b>Minor pentatonic</b> = remove the 2 and ♭6</li>
+      <li><b>Blues</b> = add the ♭5 back in</li>
+    </ol>
+  </div>
+
+  <footer>mike's music project — scale reference</footer>
+</div>
+
+<script>
+  const CHROM = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+  function noteAt(rootIdx, semis){ return CHROM[(rootIdx + semis + 12) % 12]; }
+
+  function buildScales(root){
+    const r = CHROM.indexOf(root);
+    return {
+      major: { 1:noteAt(r,0), 2:noteAt(r,2), 3:noteAt(r,4), 4:noteAt(r,5), 5:noteAt(r,7), 6:noteAt(r,9), 7:noteAt(r,11) },
+      minor: { 1:noteAt(r,0), 2:noteAt(r,2), 3:noteAt(r,3), 4:noteAt(r,5), 5:noteAt(r,7), 6:noteAt(r,8), 7:noteAt(r,10) },
+      pent:  { 1:noteAt(r,0), 3:noteAt(r,3), 4:noteAt(r,5), 5:noteAt(r,7), 7:noteAt(r,10) },
+      blues: { 1:noteAt(r,0), 3:noteAt(r,3), 4:noteAt(r,5), b5:noteAt(r,6), 5:noteAt(r,7), 7:noteAt(r,10) }
+    };
+  }
+
+  // melodic column order across every row, 8 slots wide (b5 sits between 4 and 5)
+  const COL_ORDER = [1,2,3,4,'b5',5,6,7];
+
+  function tile(html, cls){
+    return `<div class="tile ${cls}">${html}</div>`;
+  }
+
+  function tileContent(note, degLabel){
+    return `<span class="note">${note}</span><span class="deg">${degLabel}</span>`;
+  }
+
+  function renderRow(col){
+    return COL_ORDER.map(c => {
+      const spec = col[c];
+      if(!spec || spec.state === 'empty') return `<div class="tile tile--empty"></div>`;
+      if(spec.state === 'removed') return tile(tileContent(spec.note, spec.deg), 'tile--removed');
+      if(spec.state === 'flat')    return tile(tileContent(spec.note, spec.deg), 'tile--flat');
+      if(spec.state === 'added')   return tile(tileContent(spec.note, spec.deg), 'tile--added');
+      return tile(tileContent(spec.note, spec.deg), 'tile--plain');
+    }).join('');
+  }
+
+  function render(root){
+    const s = buildScales(root);
+
+    const majorRow = {
+      1:{state:'plain', note:s.major[1], deg:'1'},
+      2:{state:'plain', note:s.major[2], deg:'2'},
+      3:{state:'plain', note:s.major[3], deg:'3'},
+      4:{state:'plain', note:s.major[4], deg:'4'},
+      'b5':{state:'empty'},
+      5:{state:'plain', note:s.major[5], deg:'5'},
+      6:{state:'plain', note:s.major[6], deg:'6'},
+      7:{state:'plain', note:s.major[7], deg:'7'}
+    };
+
+    const minorRow = {
+      1:{state:'plain', note:s.minor[1], deg:'1'},
+      2:{state:'plain', note:s.minor[2], deg:'2'},
+      3:{state:'flat',  note:s.minor[3], deg:'♭3'},
+      4:{state:'plain', note:s.minor[4], deg:'4'},
+      'b5':{state:'empty'},
+      5:{state:'plain', note:s.minor[5], deg:'5'},
+      6:{state:'flat',  note:s.minor[6], deg:'♭6'},
+      7:{state:'flat',  note:s.minor[7], deg:'♭7'}
+    };
+
+    const pentRow = {
+      1:{state:'plain',   note:s.minor[1], deg:'1'},
+      2:{state:'removed', note:s.minor[2], deg:'2'},
+      3:{state:'flat',    note:s.pent[3],  deg:'♭3'},
+      4:{state:'plain',   note:s.pent[4],  deg:'4'},
+      'b5':{state:'empty'},
+      5:{state:'plain',   note:s.pent[5],  deg:'5'},
+      6:{state:'removed', note:s.minor[6], deg:'♭6'},
+      7:{state:'flat',    note:s.pent[7],  deg:'♭7'}
+    };
+
+    const bluesRow = {
+      1:{state:'plain', note:s.blues[1], deg:'1'},
+      2:{state:'empty'},
+      3:{state:'flat',  note:s.blues[3], deg:'♭3'},
+      4:{state:'plain', note:s.blues[4], deg:'4'},
+      'b5':{state:'added', note:s.blues['b5'], deg:'♭5'},
+      5:{state:'plain', note:s.blues[5], deg:'5'},
+      6:{state:'empty'},
+      7:{state:'flat',  note:s.blues[7], deg:'♭7'}
+    };
+
+    const rows = [
+      { step:'01', title:`${root} Major Scale`, formula:'W – W – H – W – W – W – H',
+        caption:'The reference point. Every row below is described relative to this.', grid: majorRow },
+      { step:'02', title:`${root} Natural Minor`, formula:'Flat the 3, 6, and 7',
+        caption:'Same root, three degrees lowered a half step.', grid: minorRow },
+      { step:'03', title:`${root} Minor Pentatonic`, formula:'Remove the 2 and ♭6',
+        caption:'Strip the two clashing notes — five left, room to bend.', grid: pentRow },
+      { step:'04', title:`${root} Blues Scale`, formula:'Add the ♭5 back in',
+        caption:'One passing tone between the 4 and 5 — slide through it, don\u2019t land on it.', grid: bluesRow }
+    ];
+
+    document.getElementById('rows').innerHTML = rows.map(r => `
+      <div class="row">
+        <div class="row-label">
+          <p class="step">${r.step}</p>
+          <h2>${r.title}</h2>
+          <div class="formula">${r.formula}</div>
+          <p class="caption">${r.caption}</p>
+        </div>
+        <div class="comb">${renderRow(r.grid)}</div>
+      </div>
+    `).join('');
+  }
+
+  // populate key selector — plain keys only, no instrument mapping yet
+  const sel = document.getElementById('keySelect');
+  CHROM.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    sel.appendChild(opt);
+  });
+  sel.value = 'G';
+  sel.addEventListener('change', () => render(sel.value));
+
+  render('G');
+</script>
+</body>
+</html>

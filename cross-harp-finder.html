@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross Harp Finder — Blues Theory Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #eef1ea;
+    --bg-panel: #ffffff;
+    --bg-panel-2: #f5f7f1;
+    --hole: #ffffff;
+    --text: #1e2a24;
+    --text-dim: #5b6b62;
+    --text-faint: #93a099;
+    --brass: #8a6a12;
+    --brass-bright: #a9821c;
+    --flat: #a8452c;
+    --removed: #9aa39c;
+    --added: #2f7a63;
+    --added-glow: rgba(47,122,99,0.16);
+    --rule: #d9ddd3;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(138,106,18,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:24px;
+    padding-bottom:28px;
+    margin-bottom:36px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:42px;
+    line-height:1;
+    margin:0 0 8px;
+    color:var(--text);
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:440px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .key-picker{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:200px;
+  }
+  .key-picker label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  select{
+    appearance:none;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    color: var(--brass-bright);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:20px;
+    padding:10px 40px 10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow: 0 1px 2px rgba(30,42,36,0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a12' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- Result card ---------- */
+  .result{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:0;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:40px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+  }
+  .result-cell{
+    padding:26px 28px;
+  }
+  .result-cell + .result-cell{
+    border-left:1px solid var(--rule);
+  }
+  .result-label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    margin:0 0 8px;
+  }
+  .result-value{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:34px;
+    color:var(--brass-bright);
+    margin:0 0 6px;
+    line-height:1.1;
+  }
+  .result-sub{
+    font-size:12.5px;
+    color:var(--text-dim);
+    line-height:1.5;
+    margin:0;
+  }
+
+  /* ---------- Circle of fifths ---------- */
+  .circle-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    padding: 30px 0 10px;
+  }
+  .cof-circle{
+    position:relative;
+    width:520px;
+    height:520px;
+    max-width:100%;
+  }
+  .cof-ring{
+    position:absolute;
+    inset:38px;
+    border-radius:50%;
+    border:1px solid var(--rule);
+  }
+  .cof-node{
+    position:absolute;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background: var(--hole);
+    border:1px solid var(--rule);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    color:var(--text);
+    transform: translate(-50%,-50%);
+    transition: box-shadow 0.15s ease;
+  }
+  .cof-node .sub{
+    position:absolute;
+    bottom:-20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    color:var(--text-faint);
+  }
+  .cof-node.is-I{
+    background: var(--hole);
+    border:2px solid var(--added);
+    box-shadow: 0 0 0 4px var(--added-glow);
+    color:var(--added);
+  }
+  .cof-node.is-I .sub{ color:var(--added); }
+  .cof-node.is-IV{
+    background: var(--hole);
+    border:2px solid var(--brass-bright);
+    box-shadow: 0 0 0 4px rgba(169,130,28,0.16);
+    color:var(--brass-bright);
+  }
+  .cof-node.is-IV .sub{ color:var(--brass-bright); }
+  .cof-node.is-V{
+    background: var(--hole);
+    border:2px solid var(--flat);
+    box-shadow: 0 0 0 4px rgba(168,69,44,0.14);
+    color:var(--flat);
+  }
+  .cof-node.is-V .sub{ color:var(--flat); }
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:22px;
+    margin: 4px 0 44px;
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:7px; }
+  .swatch{ width:12px; height:12px; border-radius:50%; display:inline-block; background:var(--hole); }
+  .sw-I{ border:2px solid var(--added); box-shadow:0 0 0 2px var(--added-glow); }
+  .sw-IV{ border:2px solid var(--brass-bright); box-shadow:0 0 0 2px rgba(169,130,28,0.16); }
+  .sw-V{ border:2px solid var(--flat); box-shadow:0 0 0 2px rgba(168,69,44,0.14); }
+
+  /* ---------- Cheat strip ---------- */
+  .cheat{
+    margin-top: 20px;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:22px 26px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+  }
+  .cheat-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--brass-bright);
+    margin:0 0 14px;
+  }
+  .cheat ol{
+    margin:0;
+    padding-left:20px;
+    color:var(--text);
+    font-size:13.5px;
+    line-height:2;
+  }
+  .cheat b{ color:var(--brass-bright); }
+
+  footer{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+    margin-top:40px;
+    letter-spacing:0.04em;
+  }
+
+  @media (max-width:640px){
+    h1{ font-size:32px; }
+    header{ align-items:flex-start; }
+    .result{ grid-template-columns: 1fr; }
+    .result-cell + .result-cell{ border-left:none; border-top:1px solid var(--rule); }
+    .cof-circle{ width:340px; height:340px; }
+    .cof-node{ width:48px; height:48px; font-size:14px; }
+    .cof-node .sub{ bottom:-16px; font-size:9px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Blues Theory Reference</p>
+      <h1>Cross Harp Finder</h1>
+      <p class="subtitle">Pick the key you want to play blues in. This shows which harmonica to pick up for 2nd position, and where the I, IV, and V chords sit on the circle of fifths.</p>
+    </div>
+    <div class="key-picker">
+      <label for="keySelect">Blues key (2nd position)</label>
+      <select id="keySelect"></select>
+    </div>
+  </header>
+
+  <div class="result" id="result"></div>
+
+  <div class="circle-section">
+    <div class="cof-circle" id="cofCircle">
+      <div class="cof-ring"></div>
+    </div>
+    <div class="legend">
+      <span><i class="swatch sw-I"></i>I — the blues key (home)</span>
+      <span><i class="swatch sw-IV"></i>IV — your harmonica's key</span>
+      <span><i class="swatch sw-V"></i>V — dominant</span>
+    </div>
+  </div>
+
+  <div class="cheat">
+    <p class="cheat-title">Why this works</p>
+    <ol>
+      <li><b>2nd position</b> (cross harp) means the harmonica's home key sits a fifth <i>below</i> the key you're playing in.</li>
+      <li>So the harmonica you need is always the <b>IV chord</b> of the blues key — one step counterclockwise on the circle.</li>
+      <li>The <b>V chord</b> is the mirror image — one step clockwise, a fifth above the blues key.</li>
+      <li>Same three-in-a-row rule as any 12-bar blues: pick I, its neighbors are IV and V.</li>
+    </ol>
+  </div>
+
+  <footer>mike's music project — cross harp reference</footer>
+</div>
+
+<script>
+  // Chromatic order — matches scale-builder.html note naming (flats)
+  const CHROM = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+  // Same 12 keys, ordered by ascending fifths — this order IS the circle
+  const FIFTHS = ['C','G','D','A','E','B','Gb','Db','Ab','Eb','Bb','F'];
+
+  const circleEl = document.getElementById('cofCircle');
+  const resultEl = document.getElementById('result');
+  const sel = document.getElementById('keySelect');
+
+  // Build the 12 circle nodes once
+  const cx = 260, cy = 260, r = 220;
+  FIFTHS.forEach((note, i) => {
+    const angle = (i * 30) * Math.PI / 180; // 0 = top, clockwise
+    const x = cx + r * Math.sin(angle);
+    const y = cy - r * Math.cos(angle);
+    const node = document.createElement('div');
+    node.className = 'cof-node';
+    node.id = 'node-' + note.replace('#','sharp');
+    node.style.left = x + 'px';
+    node.style.top = y + 'px';
+    node.innerHTML = `<span>${note}</span>`;
+    circleEl.appendChild(node);
+  });
+
+  function clearHighlights(){
+    document.querySelectorAll('.cof-node').forEach(n => {
+      n.classList.remove('is-I','is-IV','is-V');
+      const oldSub = n.querySelector('.sub');
+      if(oldSub) oldSub.remove();
+    });
+  }
+
+  function highlight(note, roleClass, label){
+    const el = document.getElementById('node-' + note.replace('#','sharp'));
+    if(!el) return;
+    el.classList.add(roleClass);
+    const sub = document.createElement('span');
+    sub.className = 'sub';
+    sub.textContent = label;
+    el.appendChild(sub);
+  }
+
+  function render(key){
+    const tIdx = FIFTHS.indexOf(key);
+    const ivIdx = (tIdx - 1 + 12) % 12;
+    const vIdx  = (tIdx + 1) % 12;
+
+    const iKey  = FIFTHS[tIdx];
+    const ivKey = FIFTHS[ivIdx]; // this is also the harmonica key
+    const vKey  = FIFTHS[vIdx];
+
+    clearHighlights();
+    highlight(iKey, 'is-I', 'I');
+    highlight(ivKey, 'is-IV', 'IV');
+    highlight(vKey, 'is-V', 'V');
+
+    resultEl.innerHTML = `
+      <div class="result-cell">
+        <p class="result-label">Pick up your</p>
+        <p class="result-value">${ivKey} harmonica</p>
+        <p class="result-sub">Play it in 2nd position (cross harp) to land in ${iKey}.</p>
+      </div>
+      <div class="result-cell">
+        <p class="result-label">You'll be playing in</p>
+        <p class="result-value">${iKey} blues</p>
+        <p class="result-sub">I: ${iKey} &nbsp;·&nbsp; IV: ${ivKey} &nbsp;·&nbsp; V: ${vKey}</p>
+      </div>
+    `;
+  }
+
+  CHROM.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    sel.appendChild(opt);
+  });
+  sel.value = 'G';
+  sel.addEventListener('change', () => render(sel.value));
+
+  render('G');
+</script>
+</body>
+</html>
