@@ -1,23 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Dashboards</title>
-  <meta charset="UTF-8">
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; }
-    h1 { margin-bottom: 30px; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 15px; }
-    a { text-decoration: none; font-size: 18px; color: #0366d6; }
-    a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <h1>My Dashboards</h1>
-  <ul>
-    <li><a href="cross-harp-blues-scale.html">Cross Harp Blues Scale</a></li>
-    <li><a href="cross-harp-finder.html">Cross Harp Finder</a></li>
-    <li><a href="scale-builder.html">Scale Builder</a></li>
-  </ul>
-</body>
-</html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blues Theory Reference — Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #eef1ea;
+    --bg-panel: #ffffff;
+    --text: #1e2a24;
+    --text-dim: #5b6b62;
+    --text-faint: #93a099;
+    --brass: #8a6a12;
+    --brass-bright: #a9821c;
+    --rule: #d9ddd3;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(138,106,18,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap{ max-width: 720px; margin: 0 auto; }
+
+  header{
+    padding-bottom:28px;
+    margin-bottom:36px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:42px;
+    line-height:1;
+    margin:0 0 8px;
