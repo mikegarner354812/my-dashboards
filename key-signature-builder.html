@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key Signature Builder — Blues Theory Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #eef1ea;
+    --bg-panel: #ffffff;
+    --bg-panel-2: #f5f7f1;
+    --hole: #ffffff;
+    --text: #1e2a24;
+    --text-dim: #5b6b62;
+    --text-faint: #93a099;
+    --brass: #8a6a12;
+    --brass-bright: #a9821c;
+    --flat: #a8452c;
+    --rule: #d9ddd3;
+    --ink: #1e2a24;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(138,106,18,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:24px;
+    padding-bottom:28px;
+    margin-bottom:36px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:42px;
+    line-height:1;
+    margin:0 0 8px;
+    color:var(--text);
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:460px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .controls{
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+  .control{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:160px;
+  }
+  .control label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  select{
+    appearance:none;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    color: var(--brass-bright);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:20px;
+    padding:10px 40px 10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow: 0 1px 2px rgba(30,42,36,0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a12' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  .toggle{
+    display:flex;
+    border:1px solid var(--rule);
+    border-radius:6px;
+    overflow:hidden;
+    background:var(--bg-panel);
+  }
+  .toggle button{
+    flex:1;
+    border:none;
+    background:transparent;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:15px;
+    padding:10px 18px;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .toggle button.active{
+    background: var(--brass);
+    color:#fff;
+  }
+
+  /* ---------- Section titles ---------- */
+  .section{
+    margin: 34px 0;
+  }
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color: var(--text-faint);
+    margin:0 0 4px;
+  }
+  .section h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 6px;
+    color:var(--text);
+  }
+  .section .caption{
+    font-size:12.5px;
+    line-height:1.5;
+    color:var(--text-dim);
+    max-width:520px;
+    margin:0 0 18px;
+  }
+
+  /* ---------- Degree tiles ---------- */
+  .comb{
+    background: var(--bg-panel-2);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:14px;
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap:8px;
+  }
+  .tile{
+    aspect-ratio: 1 / 1.18;
+    border-radius:7px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background: var(--hole);
+    border:1px solid var(--rule);
+  }
+  .tile--flat{
+    border:1px solid var(--flat);
+    box-shadow: inset 0 0 0 1px rgba(168,69,44,0.1);
+  }
+  .tile--flat .note, .tile--flat .deg{ color: var(--flat); }
+  .note{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    line-height:1;
+    color:var(--text);
+  }
+  .deg{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    font-weight:700;
+    color: var(--text-faint);
+    letter-spacing:0.01em;
+    line-height:1;
+  }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin: 14px 0 0;
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:7px; }
+  .swatch{ width:11px; height:11px; border-radius:3px; display:inline-block; }
+  .sw-plain{ background:var(--hole); border:1px solid var(--rule); }
+  .sw-flat{ background:var(--hole); border:1px solid var(--flat); }
+
+  /* ---------- Staff panel ---------- */
+  .staff-panel{
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:18px 22px 22px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+    overflow-x:auto;
+  }
+  .staff-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .staff-meta .kslabel{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--brass-bright);
+  }
+  .staff-meta .ksdetail{
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  svg text{ user-select:none; }
+
+  /* ---------- Cheat strip ---------- */
+  .cheat{
+    margin-top: 8px;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:22px 26px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+  }
+  .cheat-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--brass-bright);
+    margin:0 0 14px;
+  }
+  .cheat ol{
+    margin:0;
+    padding-left:20px;
+    color:var(--text);
+    font-size:13.5px;
+    line-height:2;
+  }
+  .cheat b{ color:var(--brass-bright); }
+
+  footer{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+    margin-top:40px;
+    letter-spacing:0.04em;
+  }
+
+  @media (max-width:640px){
+    h1{ font-size:32px; }
+    header{ align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Blues Theory Reference</p>
+      <h1>Key Signature Builder</h1>
+      <p class="subtitle">Pick a key and a mode. See the scale, see which notes carry a sharp or flat, and see exactly what gets marked on the staff — once, at the start — instead of note by note.</p>
+    </div>
+    <div class="controls">
+      <div class="control">
+        <label for="keySelect">Key</label>
+        <select id="keySelect"></select>
+      </div>
+      <div class="control">
+        <label>Mode</label>
+        <div class="toggle">
+          <button id="btnMajor" class="active">Major</button>
+          <button id="btnMinor">Minor</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="section">
+    <p class="section-title">01</p>
+    <h2 id="scaleTitle">Scale</h2>
+    <p class="caption" id="scaleCaption"></p>
+    <div class="comb" id="degreeRow"></div>
+    <div class="legend">
+      <span><i class="swatch sw-plain"></i>natural</span>
+      <span><i class="swatch sw-flat"></i>sharp or flat</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">02</p>
+    <h2>On the Staff</h2>
+    <p class="caption">The key signature goes once, right after the clef. Every note on that line/space is altered for the rest of the piece — that's why none of the individual noteheads below need their own sharp or flat mark.</p>
+    <div class="staff-panel">
+      <div class="staff-meta">
+        <span class="kslabel" id="ksLabel"></span>
+        <span class="ksdetail" id="ksDetail"></span>
+      </div>
+      <div id="staffHolder"></div>
+    </div>
+  </div>
+
+  <div class="cheat">
+    <p class="cheat-title">Reading the signature</p>
+    <ol>
+      <li><b>Sharp order</b> — F C G D A E B (always added in this order, left to right)</li>
+      <li><b>Flat order</b> — B E A D G C F (the exact reverse of the sharp order)</li>
+      <li><b>Count the marks</b> at the start of the staff to know how many degrees are altered</li>
+      <li>Relative major/minor pairs (e.g. G major / E minor) always share the same signature</li>
+    </ol>
+  </div>
+
+  <footer>mike's music project — key signature reference</footer>
+</div>
+
+<script>
+  // ---------- Key data: 15 standard keys, circle of fifths order ----------
+  // Each entry: majorName, majorScale (7 spelled notes), sharps/flats count.
+  const KEYS = [
+    { major:'C',  scale:['C','D','E','F','G','A','B'],                sharps:0, flats:0 },
+    { major:'G',  scale:['G','A','B','C','D','E','F#'],               sharps:1, flats:0 },
+    { major:'D',  scale:['D','E','F#','G','A','B','C#'],              sharps:2, flats:0 },
+    { major:'A',  scale:['A','B','C#','D','E','F#','G#'],             sharps:3, flats:0 },
+    { major:'E',  scale:['E','F#','G#','A','B','C#','D#'],            sharps:4, flats:0 },
+    { major:'B',  scale:['B','C#','D#','E','F#','G#','A#'],           sharps:5, flats:0 },
+    { major:'F#', scale:['F#','G#','A#','B','C#','D#','E#'],          sharps:6, flats:0 },
+    { major:'C#', scale:['C#','D#','E#','F#','G#','A#','B#'],         sharps:7, flats:0 },
+    { major:'F',  scale:['F','G','A','Bb','C','D','E'],               sharps:0, flats:1 },
+    { major:'Bb', scale:['Bb','C','D','Eb','F','G','A'],              sharps:0, flats:2 },
+    { major:'Eb', scale:['Eb','F','G','Ab','Bb','C','D'],             sharps:0, flats:3 },
+    { major:'Ab', scale:['Ab','Bb','C','Db','Eb','F','G'],            sharps:0, flats:4 },
+    { major:'Db', scale:['Db','Eb','F','Gb','Ab','Bb','C'],           sharps:0, flats:5 },
+    { major:'Gb', scale:['Gb','Ab','Bb','Cb','Db','Eb','F'],          sharps:0, flats:6 },
+    { major:'Cb', scale:['Cb','Db','Eb','Fb','Gb','Ab','Bb'],         sharps:0, flats:7 },
+  ];
+  // derive relative minor name + minor scale (rotate major scale to start at degree 6)
+  KEYS.forEach(k => {
+    const rot = k.scale.slice(5).concat(k.scale.slice(0,5));
+    k.minor = rot[0];
+    k.minorScale = rot;
+  });
+
+  const SHARP_ORDER = ['F','C','G','D','A','E','B'];
+  const FLAT_ORDER  = ['B','E','A','D','G','C','F'];
+
+  // ---------- Staff geometry ----------
+  // Diatonic step: E4 = 0. Lines at even steps (0,2,4,6,8) = E G B D F. Spaces at odd steps.
+  // Octave numbers follow scientific pitch notation, where the octave boundary sits
+  // between B and C (not between G and A) — so ordering must start at C, not A.
+  const OCTAVE_ORDER = ['C','D','E','F','G','A','B'];
+  function letterIdx(l){ return OCTAVE_ORDER.indexOf(l); }
+  function step(letter, octave){
+    return (letterIdx(letter) - letterIdx('E')) + 7*(octave-4);
+  }
+
+  const STEP_PX = 6;
+  const STAFF_LEFT = 90;
+  const Y_E4 = 150; // svg y-coordinate of bottom line (E4 / step 0)
+  function yFor(stepVal){ return Y_E4 - stepVal*STEP_PX; }
+
+  // fixed letter/octave for each accidental position, in signature order
+  const SHARP_POS = [ ['F',5],['C',5],['G',5],['D',5],['A',4],['E',5],['B',4] ];
+  const FLAT_POS  = [ ['B',4],['E',5],['A',4],['D',5],['G',4],['C',5],['F',4] ];
+
+  function buildStaffSVG(sharps, flats, noteLetters){
+    // noteLetters: array of {letter, octave, deg} for the 8 notes to draw (root..root)
+    const staffLines = [0,2,4,6,8]; // E G B D F
+    const accCount = Math.max(sharps, flats);
+    const accStartX = STAFF_LEFT + 46;
+    const accSpacing = 20;
+    const noteStartX = accStartX + (accCount>0 ? accCount*accSpacing + 30 : 20);
+    const noteSpacing = 34;
+    const staffRight = noteStartX + (noteLetters.length-1)*noteSpacing + 34;
+
+    // compute vertical extent for ledger lines / viewbox
+    let minStep = 0, maxStep = 8;
+    noteLetters.forEach(n => {
+      const s = step(n.letter, n.octave);
+      if(s < minStep) minStep = s;
+      if(s > maxStep) maxStep = s;
+    });
+    (sharps>0?SHARP_POS.slice(0,sharps):FLAT_POS.slice(0,flats)).forEach(p=>{
+      const s = step(p[0], p[1]);
+      if(s<minStep) minStep=s; if(s>maxStep) maxStep=s;
+    });
+
+    const svgTop = yFor(maxStep) - 30;
+    const svgBottom = yFor(minStep) + 26;
+    const svgH = svgBottom - svgTop;
+    const svgW = staffRight + 10;
+
+    let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">`;
+    const oy = -svgTop; // offset so content sits inside viewbox
+    svg += `<g transform="translate(0 ${oy})">`;
+
+    // staff lines
+    staffLines.forEach(s=>{
+      const y = yFor(s);
+      svg += `<line x1="${STAFF_LEFT}" y1="${y}" x2="${staffRight}" y2="${y}" stroke="#1e2a24" stroke-width="1.1"/>`;
+    });
+    // barlines
+    svg += `<line x1="${STAFF_LEFT}" y1="${yFor(0)}" x2="${STAFF_LEFT}" y2="${yFor(8)}" stroke="#1e2a24" stroke-width="1.3"/>`;
+    svg += `<line x1="${staffRight}" y1="${yFor(0)}" x2="${staffRight}" y2="${yFor(8)}" stroke="#1e2a24" stroke-width="1.3"/>`;
+
+    // treble clef (unicode glyph, sized to span the staff)
+    svg += `<text x="${STAFF_LEFT+6}" y="${yFor(4)+16}" font-size="52" fill="#1e2a24">&#119070;</text>`;
+
+    // key signature accidentals
+    const positions = sharps>0 ? SHARP_POS.slice(0,sharps) : FLAT_POS.slice(0,flats);
+    const symbol = sharps>0 ? '\u266F' : '\u266D';
+    positions.forEach((p,i)=>{
+      const y = yFor(step(p[0],p[1]));
+      const x = accStartX + i*accSpacing;
+      svg += `<text x="${x}" y="${y+8}" font-size="32" fill="#1e2a24" font-weight="700">${symbol}</text>`;
+    });
+
+    // notes + ledger lines + degree labels
+    noteLetters.forEach((n,i)=>{
+      const s = step(n.letter, n.octave);
+      const x = noteStartX + i*noteSpacing;
+      const y = yFor(s);
+
+      // ledger lines
+      if(s > 8){
+        for(let l=10; l<=s; l+=2){
+          const ly = yFor(l);
+          svg += `<line x1="${x-11}" y1="${ly}" x2="${x+11}" y2="${ly}" stroke="#1e2a24" stroke-width="1"/>`;
+        }
+      } else if(s < 0){
+        for(let l=-2; l>=s; l-=2){
+          const ly = yFor(l);
+          svg += `<line x1="${x-11}" y1="${ly}" x2="${x+11}" y2="${ly}" stroke="#1e2a24" stroke-width="1"/>`;
+        }
+      }
+
+      // notehead
+      const fill = i===noteLetters.length-1 || i===0 ? '#a9821c' : '#1e2a24';
+      svg += `<ellipse cx="${x}" cy="${y}" rx="6.5" ry="5" fill="${fill}" transform="rotate(-18 ${x} ${y})"/>`;
+
+      // stem
+      const stemUp = s < 4;
+      if(stemUp){
+        svg += `<line x1="${x+6.2}" y1="${y-1}" x2="${x+6.2}" y2="${y-32}" stroke="${fill}" stroke-width="1.3"/>`;
+      } else {
+        svg += `<line x1="${x-6.2}" y1="${y+1}" x2="${x-6.2}" y2="${y+32}" stroke="${fill}" stroke-width="1.3"/>`;
+      }
+
+      // degree label
+      svg += `<text x="${x}" y="${yFor(minStep)+20}" font-size="11" fill="#93a099" text-anchor="middle" font-weight="700">${n.deg}</text>`;
+    });
+
+    svg += `</g></svg>`;
+    return svg;
+  }
+
+  // ---------- Build the note-letter/octave sequence for a scale ----------
+  function noteSequence(scaleArr){
+    // scaleArr: 7 spelled notes ascending from tonic, e.g. ['F#','G#','A#','B','C#','D#','E#']
+    const letters = scaleArr.map(n=>n[0]);
+    letters.push(letters[0]); // repeat root an octave up
+    const degs = ['1','2','3','4','5','6','7','8'];
+    let oct = 4;
+    let prevIdx = letterIdx(letters[0]);
+    const out = [{letter:letters[0], octave:oct, deg:degs[0]}];
+    for(let i=1;i<letters.length;i++){
+      const idx = letterIdx(letters[i]);
+      if(idx <= prevIdx) oct++;
+      out.push({letter:letters[i], octave:oct, deg:degs[i]});
+      prevIdx = idx;
+    }
+    return out;
+  }
+
+  // ---------- Rendering ----------
+  let mode = 'major';
+  let currentIdx = 0; // index into KEYS
+
+  const sel = document.getElementById('keySelect');
+  const btnMajor = document.getElementById('btnMajor');
+  const btnMinor = document.getElementById('btnMinor');
+
+  function populateSelect(){
+    const prevLetter = sel.value ? sel.value : null;
+    sel.innerHTML = '';
+    KEYS.forEach((k,i)=>{
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = mode==='major' ? k.major : k.minor;
+      sel.appendChild(opt);
+    });
+    // try to preserve the same letter name across a mode switch (parallel key),
+    // otherwise fall back to the same circle-of-fifths index (relative key)
+    if(prevLetter !== null){
+      const match = KEYS.findIndex(k => (mode==='major'?k.major:k.minor) === prevLetter);
+      sel.value = match >= 0 ? match : currentIdx;
+    } else {
+      sel.value = currentIdx;
+    }
+    currentIdx = parseInt(sel.value,10);
+  }
+
+  function render(){
+    const k = KEYS[currentIdx];
+    const scale = mode==='major' ? k.scale : k.minorScale;
+    const rootName = mode==='major' ? k.major : k.minor;
+    const sharps = k.sharps, flats = k.flats;
+
+    document.getElementById('scaleTitle').textContent = `${rootName} ${mode==='major' ? 'Major' : 'Natural Minor'} Scale`;
+    document.getElementById('scaleCaption').textContent = mode==='major'
+      ? 'W – W – H – W – W – W – H from the root.'
+      : 'Same key signature as its relative major — just starting from a different note.';
+
+    // degree tiles
+    const degreeRow = document.getElementById('degreeRow');
+    degreeRow.innerHTML = scale.map((n,i)=>{
+      const altered = n.length > 1;
+      return `<div class="tile ${altered ? 'tile--flat' : ''}">
+        <span class="note">${n}</span>
+        <span class="deg">${i+1}</span>
+      </div>`;
+    }).join('');
+
+    // staff meta
+    const ksLabel = document.getElementById('ksLabel');
+    const ksDetail = document.getElementById('ksDetail');
+    if(sharps===0 && flats===0){
+      ksLabel.textContent = 'No sharps, no flats';
+      ksDetail.textContent = '';
+    } else if(sharps>0){
+      ksLabel.textContent = `${sharps} sharp${sharps>1?'s':''}`;
+      ksDetail.textContent = SHARP_ORDER.slice(0,sharps).map(l=>l+'\u266F').join('  ');
+    } else {
+      ksLabel.textContent = `${flats} flat${flats>1?'s':''}`;
+      ksDetail.textContent = FLAT_ORDER.slice(0,flats).map(l=>l+'\u266D').join('  ');
+    }
+
+    // staff
+    const seq = noteSequence(scale);
+    document.getElementById('staffHolder').innerHTML = buildStaffSVG(sharps, flats, seq);
+  }
+
+  sel.addEventListener('change', ()=>{
+    currentIdx = parseInt(sel.value,10);
+    render();
+  });
+
+  btnMajor.addEventListener('click', ()=>{
+    if(mode==='major') return;
+    mode='major';
+    btnMajor.classList.add('active');
+    btnMinor.classList.remove('active');
+    populateSelect();
+    render();
+  });
+  btnMinor.addEventListener('click', ()=>{
+    if(mode==='minor') return;
+    mode='minor';
+    btnMinor.classList.add('active');
+    btnMajor.classList.remove('active');
+    populateSelect();
+    render();
+  });
+
+  populateSelect();
+  render();
+</script>
+</body>
+</html>
