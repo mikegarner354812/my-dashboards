@@ -53,3 +53,117 @@
     font-size:42px;
     line-height:1;
     margin:0 0 8px;
+    color:var(--text);
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:480px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .tool-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .tool-card{
+    display:block;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:20px 24px;
+    text-decoration:none;
+    color:inherit;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .tool-card:hover{
+    border-color: var(--brass-bright);
+    box-shadow: 0 2px 8px rgba(138,106,18,0.12);
+  }
+  .tool-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    color: var(--brass-bright);
+    margin:0 0 6px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .tool-name .arrow{
+    font-size:14px;
+    color: var(--text-faint);
+  }
+  .tool-desc{
+    font-size:12.5px;
+    line-height:1.5;
+    color: var(--text-dim);
+    margin:0;
+  }
+  .tool-file{
+    font-size:10.5px;
+    color: var(--text-faint);
+    margin:8px 0 0;
+    letter-spacing:0.02em;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+    margin-top:40px;
+    letter-spacing:0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Mike's Music Project</p>
+    <h1>Blues Theory Reference</h1>
+    <p class="subtitle">A small set of interactive tools for harmonica, piano, and blues theory. Listed alphabetically.</p>
+  </header>
+
+  <div class="tool-list">
+
+    <a class="tool-card" href="cross-harp-blues-scale.html">
+      <p class="tool-name">Cross Harp Blues Scale <span class="arrow">&rarr;</span></p>
+      <p class="tool-desc">Pick a blues key and see the extended blues scale mapped directly onto the harmonica holes — blow, draw, and bends — for 2nd position.</p>
+      <p class="tool-file">cross-harp-blues-scale.html</p>
+    </a>
+
+    <a class="tool-card" href="cross-harp-finder.html">
+      <p class="tool-name">Cross Harp Finder <span class="arrow">&rarr;</span></p>
+      <p class="tool-desc">Pick the key you want to play blues in and find which harmonica to grab for 2nd position, plus where I, IV, and V sit on the circle of fifths.</p>
+      <p class="tool-file">cross-harp-finder.html</p>
+    </a>
+
+    <a class="tool-card" href="key-finder.html">
+      <p class="tool-name">Key Finder <span class="arrow">&rarr;</span></p>
+      <p class="tool-desc">Enter the number of sharps or flats you see at the start of a piece and get the two candidate keys — plus what to check to pick between them.</p>
+      <p class="tool-file">key-finder.html</p>
+    </a>
+
+    <a class="tool-card" href="key-signature-builder.html">
+      <p class="tool-name">Key Signature Builder <span class="arrow">&rarr;</span></p>
+      <p class="tool-desc">Pick a key and major or minor, see the scale with sharps/flats highlighted, and see the correct key signature drawn on a real staff.</p>
+      <p class="tool-file">key-signature-builder.html</p>
+    </a>
+
+    <a class="tool-card" href="scale-builder.html">
+      <p class="tool-name">Scale Builder <span class="arrow">&rarr;</span></p>
+      <p class="tool-desc">Major &rarr; natural minor &rarr; minor pentatonic &rarr; blues, built up degree by degree in any key.</p>
+      <p class="tool-file">scale-builder.html</p>
+    </a>
+
+  </div>
+
+  <footer>mike's music project — reference index</footer>
+</div>
+</body>
+</html>
