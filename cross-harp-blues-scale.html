@@ -145,6 +145,52 @@
     margin:0;
   }
 
+  /* ---------- Note list ---------- */
+  .note-list{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:18px 22px;
+    margin-bottom:28px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+  }
+  .note-list-label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    margin-right:6px;
+  }
+  .note-chip{
+    display:inline-flex;
+    align-items:baseline;
+    gap:6px;
+    background: var(--brass-glow);
+    border:1.4px solid var(--brass-bright);
+    border-radius:7px;
+    padding:6px 12px;
+  }
+  .note-chip .chip-note{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    color: var(--brass-bright);
+  }
+  .note-chip .chip-deg{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    font-size:11.5px;
+    color: var(--text-dim);
+  }
+  .note-arrow{
+    color: var(--text-faint);
+    font-size:14px;
+  }
+
   /* ---------- Chart ---------- */
   .chart-area{ padding: 36px var(--bar-overhang) 20px; }
 
@@ -284,6 +330,8 @@
 
   <div class="result" id="result"></div>
 
+  <div class="note-list" id="noteList"></div>
+
   <div class="chart-area">
     <div class="harp-grid" id="harpGrid"></div>
   </div>
@@ -334,6 +382,7 @@
 
   const sel = document.getElementById('keySelect');
   const resultEl = document.getElementById('result');
+  const noteListEl = document.getElementById('noteList');
   const gridEl = document.getElementById('harpGrid');
 
   function degreeFor(noteIdx, keyIdx){
@@ -368,6 +417,13 @@
         <p class="result-sub">1 &nbsp;·&nbsp; b3 &nbsp;·&nbsp; 4 &nbsp;·&nbsp; b5 &nbsp;·&nbsp; 5 &nbsp;·&nbsp; b7 — hole 1 blow to hole 6 blow</p>
       </div>
     `;
+
+    noteListEl.innerHTML = `<span class="note-list-label">${key} blues scale notes</span>` +
+      BLUES_DEGREES.map((d, i) => {
+        const noteName = CHROM[(kIdx + d.semi) % 12];
+        const chip = `<span class="note-chip"><span class="chip-note">${noteName}</span><span class="chip-deg">${d.label}</span></span>`;
+        return i === 0 ? chip : `<span class="note-arrow">→</span>${chip}`;
+      }).join('');
 
     let html = `<div class="bar-track"></div>`;
 
