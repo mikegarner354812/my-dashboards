@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!--
+  Harmonica Draw Bend Tracker
+  Released under the MIT License (see LICENSE file).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harmonica Draw Bend Tracker</title>
+<meta name="description" content="A simple chart for tracking your progress on draw bends across every key of diatonic harmonica. Progress is saved in your browser.">
+<style>
+:root{--bg:#faf8f4;--fg:#2a2622;--muted:#7a7268;--line:#d9d3c8;--cell:#fff;--work:#f4c95d;--done:#3f9b5f;--bad:#d64541}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1b19;--fg:#efe9e0;--muted:#a39b90;--line:#3d3934;--cell:#262320;--work:#b58a1c;--bad:#a8322e}}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:20px;max-width:900px}
+h1{font-size:1.3rem;margin:0 0 4px}
+h2{font-size:1rem;margin:28px 0 4px}
+p{color:var(--muted);margin:0 0 16px;font-size:.9rem}
+p.sub{margin-bottom:10px}
+.wrap{overflow-x:auto;max-width:100%}
+table{border-collapse:separate;border-spacing:6px}
+th{font-weight:600;font-size:1rem;padding:4px 6px}
+th.key{text-align:right;font-size:1.1rem;padding-right:10px}
+td{padding:0}
+button.c{width:64px;height:52px;border-radius:8px;border:1px solid var(--line);background:var(--cell);cursor:pointer;font-size:1.2rem;color:#fff}
+button.c.b{background:var(--bad);border-color:var(--bad)}
+button.c.w{background:var(--work);border-color:var(--work)}
+button.c.d{background:var(--done);border-color:var(--done)}
+.bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px;font-size:.9rem}
+.legend{display:flex;flex-direction:column;gap:8px;margin-top:16px;font-size:.9rem}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
+button.r{background:none;border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:7px 12px;cursor:pointer;font-size:.9rem}
+button.r.main{background:var(--done);border-color:var(--done);color:#fff}
+#status{margin-top:14px;font-size:.9rem;padding:8px 12px;border-radius:6px;border:1px solid var(--line)}
+#status.ok{border-color:var(--done)}
+#status.warn{border-color:var(--work)}
+#owned{display:flex;flex-wrap:wrap;gap:8px}
+#owned label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--cell);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:1rem;min-width:52px}
+#owned input{width:18px;height:18px;cursor:pointer;accent-color:var(--done)}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0}
+.note{margin-top:14px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--cell);color:var(--fg);font-size:.9rem;line-height:1.5}
+.note strong{display:block;margin-bottom:4px}
+.note ul{margin:6px 0 0;padding-left:20px}
+footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.8rem}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<h1>Harmonica Draw Bend Tracker</h1>
+<p>Track how your draw bends are going on every key of diatonic harmonica. Every cell starts blank. Click a cell to give it a color: red, then yellow, then green. One more click clears it back to blank. Untick any keys you don't own in the "My harmonicas" section below.</p>
+<div class="wrap"><table id="t"></table></div>
+<div class="legend">
+  <span><span class="sw" style="background:var(--done)"></span>Nailed it</span>
+  <span><span class="sw" style="background:var(--work)"></span>Getting there</span>
+  <span><span class="sw" style="background:var(--bad)"></span>Yikes I need to work on that</span>
+  <strong id="count"></strong>
+</div>
+
+<h2>My harmonicas</h2>
+<p class="sub">Tick the keys you own and they appear in the chart above. Unticking a key hides its row but keeps its progress.</p>
+<div id="owned"></div>
+
+<div class="bar">
+  <button class="r main" id="download">Download a backup copy</button>
+  <button class="r" id="import">Import a backup</button>
+  <button class="r" id="reset">Reset all</button>
+  <input type="file" id="importfile" accept=".json,application/json" hidden>
+</div>
+
+<div class="note">
+  <strong>Where is my progress saved?</strong>
+  Your progress is saved automatically in this browser on this device. If you clear your browser cache or site data, you will lose it. To keep it safe, or to move it to another device or browser:
+  <ul>
+    <li><b>To save:</b> click "Download a backup copy". A file called <code>bend-progress-backup.json</code> will be saved to your computer. Keep it somewhere safe.</li>
+    <li><b>To load:</b> click "Import a backup" and choose that file. It replaces what is currently on the page.</li>
+  </ul>
+</div>
+<div id="status" class="ok">Loading...</div>
+
+<footer>
+  Free to use and share. Released under the MIT License.
+  <!-- Replace YOUR-USERNAME with your GitHub username -->
+  <a href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script>
+var allKeys=["G","Ab","A","Bb","B","C","Db","D","Eb","E","F","F#"];
+var bends=["1'","2'","2''","3'","3''","3'''","4'","6'"];
+var STORE_KEY="bendTracker_progress";
+/* Stored cell values: 1 = yellow (getting there), 2 = green (nailed it), 3 = red (yikes).
+   A cell with no stored value is blank. Click order: blank -> red -> yellow -> green -> blank. */
+var CYCLE=[0,3,1,2];
+var CLASS={0:"",3:" b",1:" w",2:" d"};
+var WORDS={0:", not rated yet",3:", yikes I need to work on that",1:", getting there",2:", nailed it"};
+var state={}, owned=allKeys.slice();
+var storageOK=true;
+
+function setStatus(msg,cls){var s=document.getElementById("status");s.textContent=msg;s.className=cls;}
+function payload(){return JSON.stringify({app:"bend-tracker",version:5,owned:owned,cells:state},null,2);}
+
+function save(){
+  try{
+    localStorage.setItem(STORE_KEY,payload());
+    storageOK=true;
+    setStatus("Saved in this browser at "+new Date().toLocaleTimeString()+".","ok");
+  }catch(e){
+    storageOK=false;
+    setStatus("Your browser is blocking saving here, so progress will be lost when you close this page. Use \"Download a backup copy\" to keep it.","warn");
+  }
+}
+
+/* Accepts the app's backup format. Returns true if the data was usable. */
+function applyData(data){
+  if(!data||data.app!=="bend-tracker"||typeof data.cells!=="object"||data.cells===null)return false;
+  var next={};
+  for(var id in data.cells){
+    var v=data.cells[id];
+    if(v===1||v===2||v===3)next[id]=v;
+  }
+  state=next;
+  if(Array.isArray(data.owned)){
+    owned=allKeys.filter(function(k){return data.owned.indexOf(k)>=0;});
+  }
+  return true;
+}
+
+function load(){
+  try{
+    var text=localStorage.getItem(STORE_KEY);
+    if(text){
+      if(applyData(JSON.parse(text))){
+        setStatus("Welcome back. Your saved progress has been loaded.","ok");
+        return;
+      }
+    }
+    setStatus("Progress saves automatically in this browser. See the note above about backups.","ok");
+  }catch(e){
+    storageOK=false;
+    setStatus("Your browser is blocking saving here, so progress will be lost when you close this page. Use \"Download a backup copy\" to keep it.","warn");
+  }
+}
+
+function changed(){build();save();}
+
+function build(){
+  var shown=allKeys.filter(function(k){return owned.indexOf(k)>=0;});
+  var h="<tr><th></th>";
+  bends.forEach(function(b){h+="<th>"+b+"</th>"});
+  h+="</tr>";
+  shown.forEach(function(k){
+    h+='<tr><th class="key">'+k+"</th>";
+    bends.forEach(function(b){
+      var id=k+"|"+b, s=state[id]||0;
+      h+='<td><button class="c'+CLASS[s]+'" data-id="'+id+'" aria-label="'+k+" harmonica, "+b+" bend"+WORDS[s]+'">'+"</button></td>";
+    });
+    h+="</tr>";
+  });
+  document.getElementById("t").innerHTML=shown.length?h:'<tr><td class="empty">No harmonicas ticked yet. Tick your keys below.</td></tr>';
+  var n=0;shown.forEach(function(k){bends.forEach(function(b){if(state[k+"|"+b]==2)n++;});});
+  document.getElementById("count").textContent="Nailed it: "+n+" / "+(shown.length*bends.length);
+
+  var o="";
+  allKeys.forEach(function(k){
+    o+='<label><input type="checkbox" data-key="'+k+'"'+(owned.indexOf(k)>=0?" checked":"")+"> "+k+"</label>";
+  });
+  document.getElementById("owned").innerHTML=o;
+}
+
+document.getElementById("t").addEventListener("click",function(e){
+  var b=e.target.closest("button.c");if(!b)return;
+  var id=b.dataset.id,cur=state[id]||0;
+  var next=CYCLE[(CYCLE.indexOf(cur)+1)%CYCLE.length];
+  if(next)state[id]=next;else delete state[id];
+  changed();
+});
+
+document.getElementById("owned").addEventListener("change",function(e){
+  var cb=e.target.closest("input[data-key]");if(!cb)return;
+  var k=cb.dataset.key;
+  if(cb.checked){if(owned.indexOf(k)<0)owned.push(k);}
+  else owned=owned.filter(function(x){return x!==k;});
+  changed();
+});
+
+document.getElementById("download").addEventListener("click",function(){
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([payload()],{type:"application/json"}));
+  a.download="bend-progress-backup.json";
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
+  setStatus("Backup downloaded. Keep the file somewhere safe.","ok");
+});
+
+document.getElementById("import").addEventListener("click",function(){
+  document.getElementById("importfile").click();
+});
+
+document.getElementById("importfile").addEventListener("change",function(e){
+  var f=e.target.files[0];
+  e.target.value="";
+  if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    var data;
+    try{data=JSON.parse(r.result);}catch(err){data=null;}
+    var hasProgress=Object.keys(state).length>0;
+    if(!data||data.app!=="bend-tracker"||typeof data.cells!=="object"||data.cells===null){
+      setStatus("That file isn't a bend tracker backup, so nothing was changed.","warn");return;
+    }
+    if(hasProgress&&!confirm("Importing will replace the progress currently on this page. Continue?"))return;
+    applyData(data);
+    build();
+    save();
+    setStatus("Backup imported from "+f.name+".","ok");
+  };
+  r.onerror=function(){setStatus("Couldn't read that file.","warn");};
+  r.readAsText(f);
+});
+
+document.getElementById("reset").addEventListener("click",function(){
+  if(confirm("Clear all bend progress? Your list of harmonicas stays as it is. Consider downloading a backup first.")){
+    state={};build();save();
+  }
+});
+
+load();
+build();
+</script>
+</body>
+</html>
