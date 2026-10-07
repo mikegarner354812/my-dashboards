@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmonica Note Map — Full Reed Chart</title>
+<meta name="description" content="A full reed chart for any key of harmonica, with scale overlays for each playing position.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #eef1ea;
+    --bg-panel: #ffffff;
+    --text: #1e2a24;
+    --text-dim: #5b6b62;
+    --text-faint: #93a099;
+    --brass: #8a6a12;
+    --brass-bright: #a9821c;
+    --rule: #d9ddd3;
+
+    /* diagram-native palette, sampled from the source chart */
+    --ink: #000000;
+    --bar-green: #c6d68c;
+    --bar-line: #a7b672;
+    --cap-purple: #291441;
+    --strap-teal: #dbe9e6;
+
+    --box-h: 74px;
+    --badge-h: 62px;
+    --badge-gap: 7px;
+    --col-gap: 12px;
+    --cap-w: 46px;
+
+    /* difficulty-shading palette */
+    --diff-easy: #e4f4e1;
+    --diff-intermediate: #fbf3cf;
+    --diff-advanced: #f9dcdc;
+    --diff-easy-dark: #a9dd9c;
+    --diff-intermediate-dark: #f3d766;
+    --diff-advanced-dark: #ef9d9d;
+
+    /* scale build-up palette (matches scale-builder.html) */
+    --sb-flat: #a8452c;
+    --sb-removed: #9aa39c;
+    --sb-added: #2f7a63;
+    --sb-added-glow: rgba(47,122,99,0.16);
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(138,106,18,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:24px;
+    padding-bottom:28px;
+    margin-bottom:24px;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:40px;
+    line-height:1;
+    margin:0 0 8px;
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:480px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .key-picker{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:200px;
+  }
+  .key-picker label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  select{
+    appearance:none;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    color: var(--brass-bright);
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:20px;
+    padding:10px 40px 10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow: 0 1px 2px rgba(30,42,36,0.05);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a12' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position: right 14px center;
+  }
+  select:focus-visible{ outline: 2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- Note-type legend ---------- */
+  .diff-key{
+    position:absolute;
+    bottom:16px;
+    right:20px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:18px;
+    font-size:15px;
+    color:var(--text-dim);
+    z-index:50;
+  }
+  .diff-key .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .diff-key .swatch{
+    width:15px; height:15px;
+    border-radius:4px;
+    border:1px solid rgba(0,0,0,0.25);
+    display:inline-block;
+  }
+  .diff-key .swatch.easy{ background:var(--diff-easy); }
+  .diff-key .swatch.intermediate{ background:var(--diff-intermediate); }
+  .diff-key .swatch.advanced{ background:var(--diff-advanced); }
+
+  /* Difficulty fills are always on. When a scale is focused (.scale-active),
+     the light "all notes" tint is suppressed so only the scale's own notes
+     carry color -- see the .in-scale rules below, which apply regardless
+     of .scale-active. */
+  #harpDiagram:not(.scale-active) .box.diff-easy{ background: var(--diff-easy); }
+  #harpDiagram:not(.scale-active) .box.diff-intermediate{ background: var(--diff-intermediate); }
+  #harpDiagram:not(.scale-active) .box.diff-advanced{ background: var(--diff-advanced); }
+
+  /* Scale-note darkening: sits on top of the note-type color whether or not
+     the rest of the diagram is tinted. */
+  #harpDiagram .box.diff-easy.in-scale{ background: var(--diff-easy-dark); }
+  #harpDiagram .box.diff-intermediate.in-scale{ background: var(--diff-intermediate-dark); }
+  #harpDiagram .box.diff-advanced.in-scale{ background: var(--diff-advanced-dark); }
+
+  /* Scale-membership border: independent of the difficulty toggle -- this is
+     the always-visible way to see the scale on the diagram. Only touches
+     border-color/width, never border-style, so cells that legitimately have
+     no top border (mid-stack boxes) don't suddenly grow one. */
+  .box.in-scale{
+    border-left-color: var(--brass-bright);
+    border-right-color: var(--brass-bright);
+    border-bottom-color: var(--brass-bright);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+  }
+  .hole-col > .box.in-scale:first-child,
+  .box.in-scale.draw,
+  .box.in-scale.seam-top{
+    border-top-color: var(--brass-bright);
+    border-top-width: 3px;
+    border-top-style: solid;
+  }
+
+  /* Root note: outranks a regular scale tone -- thicker border, plus the
+     note letter itself is bumped up to fill as much of the cell as
+     possible and rendered bold black, so it's unmistakable at a glance. */
+  .box.is-root{
+    border-left-color: var(--brass);
+    border-right-color: var(--brass);
+    border-bottom-color: var(--brass);
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+  }
+  .hole-col > .box.is-root:first-child,
+  .box.is-root.draw,
+  .box.is-root.seam-top{
+    border-top-color: var(--brass);
+    border-top-width: 4px;
+    border-top-style: solid;
+  }
+  .box.is-root span{
+    color: #000;
+    font-weight:900;
+    font-size: clamp(15px, 2.6vw, 30px);
+  }
+
+  /* ---------- Scale controls (position + scale pickers, explanation) ---------- */
+  .scale-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+    align-items:flex-end;
+    margin-bottom:32px;
+  }
+  .scale-row .key-picker{ min-width:220px; }
+
+  /* ---------- Scale build-up (Major -> Minor -> Pentatonic -> Blues) ----------
+     Condensed adaptation of scale-builder.html's row/comb/tile system, keyed
+     to whatever root the "Key to play" position currently resolves to. */
+  .build-heading{
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 16px;
+    font-weight:600;
+  }
+
+  .sb-row{
+    padding: 24px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sb-row:last-of-type{ border-bottom:none; }
+
+  .sb-row-label{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-bottom:18px;
+  }
+  .sb-row-label h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:28px;
+    margin:0;
+    color:var(--text);
+  }
+  .sb-formula{
+    display:inline-block;
+    font-size:18px;
+    font-weight:600;
+    color: var(--brass-bright);
+    background: rgba(138,106,18,0.08);
+    border:1px solid rgba(138,106,18,0.3);
+    border-radius:4px;
+    padding:6px 12px;
+    letter-spacing:0.02em;
+  }
+
+  .sb-comb{
+    background: #f5f7f1;
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:10px;
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap:6px;
+  }
+
+  .sb-tile{
+    aspect-ratio: 1 / 1.05;
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    position:relative;
+  }
+  .sb-tile--empty{ background:transparent; }
+  .sb-tile--plain{ background:#fff; border:1px solid var(--rule); }
+  .sb-tile--plain .sb-note{ color: #000; }
+
+  .sb-tile--flat{ background:#fff; border:1px solid var(--sb-flat); }
+  .sb-tile--flat .sb-note{ color: #000; }
+  .sb-tile--flat .sb-deg{ color: #000; }
+
+  .sb-tile--removed{ background:transparent; border:1px dashed var(--sb-removed); opacity:0.7; }
+  .sb-tile--removed .sb-note{ color: #000; text-decoration: line-through; text-decoration-color: #000; }
+  .sb-tile--removed .sb-deg{ color: #000; }
+
+  .sb-tile--added{ background:#fff; border:1px solid var(--sb-added); box-shadow: 0 0 0 2px var(--sb-added-glow); }
+  .sb-tile--added .sb-note{ color: #000; }
+  .sb-tile--added .sb-deg{ color: #000; }
+  .sb-tile--added::after{
+    content:"NEW";
+    position:absolute;
+    top:-7px;
+    font-size:7px;
+    letter-spacing:0.06em;
+    background: var(--sb-added);
+    color:#fff;
+    padding:1px 4px;
+    border-radius:3px;
+    font-weight:700;
+  }
+
+  .sb-note{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: clamp(18px, 2.6vw, 30px);
+    line-height:1;
+  }
+  .sb-deg{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: clamp(15px, 2.1vw, 24px);
+    font-weight:700;
+    color: #000;
+    line-height:1;
+  }
+
+  .sb-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-top:14px;
+    font-size:10.5px;
+    color:var(--text-dim);
+  }
+  .sb-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .sb-swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .sb-sw-plain{ background:#fff; border:1px solid var(--rule); }
+  .sb-sw-flat{ background:#fff; border:1px solid var(--sb-flat); }
+  .sb-sw-removed{ background:transparent; border:1px dashed var(--sb-removed); }
+  .sb-sw-added{ background:#fff; border:1px solid var(--sb-added); box-shadow:0 0 0 2px var(--sb-added-glow); }
+
+  /* ---------- Diagram panel ---------- */
+  .panel{
+    position:relative;
+    background: var(--bg-panel);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding: 44px 28px 32px;
+    box-shadow: 0 1px 3px rgba(30,42,36,0.05);
+    overflow-x:auto;
+  }
+
+  .harp-diagram{
+    position:relative;
+    display:flex;
+    align-items:stretch;
+    min-width: 900px;
+  }
+
+  /* the continuous olive spine that runs behind every numbered reed slot */
+  .bar-track{
+    position:absolute;
+    left:0; right:0;
+    top: calc(3 * var(--box-h));
+    height: calc(var(--badge-h) + 2 * var(--badge-gap));
+    background: var(--bar-green);
+    border-top: 2px solid var(--bar-line);
+    border-bottom: 2px solid var(--bar-line);
+    z-index:10;
+  }
+
+  .end-cap{
+    flex: 0 0 var(--cap-w);
+    position:relative;
+  }
+  .o-circle{
+    position:absolute;
+    left:50%;
+    top: calc(3 * var(--box-h) + (var(--badge-h) + 2 * var(--badge-gap)) / 2);
+    transform: translate(-50%, -50%);
+    z-index:40;
+    width:32px; height:32px;
+    border-radius:50%;
+    background:#fff;
+    border:2px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink);
+  }
+  /* the teal/purple strap: centered on the numbered slot, reaching half-way
+     up into the blow box and half-way down into the draw box. Sits behind
+     the bar-track (which paints green over its middle band) and behind the
+     reed boxes (so it never covers the note text). */
+  .cap-bracket{
+    position:absolute;
+    top: calc(2.5 * var(--box-h));
+    height: calc(var(--box-h) + var(--badge-h) + 2 * var(--badge-gap));
+    width: 20px;
+    background: var(--strap-teal);
+    border: 2px solid var(--cap-purple);
+    z-index: 5;
+  }
+  .end-cap-left .cap-bracket{ right:0; border-radius:12px 0 0 12px; }
+  .end-cap-right .cap-bracket{ left:0; border-radius:0 12px 12px 0; }
+
+  .holes-row{
+    flex: 1 1 auto;
+    display:flex;
+    gap: var(--col-gap);
+  }
+
+  .hole-col{
+    position:relative;
+    flex: 1 1 0;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+  }
+  /* the same teal/purple strap as the end caps, but centered on the gap
+     between every pair of adjacent holes so it flanks every badge. It's
+     wider than the visible gap and overlaps slightly into both neighboring
+     boxes; those boxes sit at a higher z-index (see .box) and cover the
+     overlap, so only a sliver peeks out on each side -- same "tucked
+     behind the notes" look as the end straps. */
+  .hole-col:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    right: calc(-1 * (var(--col-gap) + 8px));
+    width: calc(var(--col-gap) + 16px);
+    top: calc(2.5 * var(--box-h));
+    height: calc(var(--box-h) + var(--badge-h) + 2 * var(--badge-gap));
+    background: var(--strap-teal);
+    border: 2px solid var(--cap-purple);
+    border-radius: 6px;
+    z-index: 5;
+  }
+
+  .box{
+    position:relative;
+    z-index:6;
+    height: var(--box-h);
+    border-left: 2px solid var(--ink);
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    border-top: none;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 2px 3px;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: clamp(11px, 1.25vw, 16px);
+    color: var(--text);
+    line-height:1.15;
+  }
+  .hole-col > .box:first-child{ border-top: 2px solid var(--ink); }
+  .box.draw{ border-top: 2px solid var(--ink); }
+  .box.seam-top{ border-top: 2px solid var(--ink); }
+  .box.empty{ background:transparent !important; border-color:transparent !important; }
+
+  .badge{
+    height: var(--badge-h);
+    margin: var(--badge-gap) 0;
+    border: 2.5px solid var(--ink);
+    border-radius: 12px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: clamp(16px, 2vw, 24px);
+    color:#1a1a1a;
+    position:relative;
+    z-index:20;
+  }
+
+  .back{
+    text-align:center;
+    font-size:12px;
+    margin:36px 0 0;
+  }
+  .back a{ color: var(--brass); }
+
+  footer{
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+    margin-top:16px;
+    letter-spacing:0.04em;
+  }
+
+  @media (max-width:640px){
+    h1{ font-size:30px; }
+    header{ align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Harmonica Reference</p>
+      <h1>Harmonica Note Map</h1>
+    </div>
+  </header>
+
+  <div class="scale-row">
+    <div class="key-picker">
+      <label for="keySelect">Harmonica key</label>
+      <select id="keySelect"></select>
+    </div>
+    <div class="key-picker">
+      <label for="positionSelect">Key to play (position)</label>
+      <select id="positionSelect"></select>
+    </div>
+    <div class="key-picker">
+      <label for="scaleSelect">Scale to display</label>
+      <select id="scaleSelect">
+        <option value="none">None</option>
+        <option value="major">Major</option>
+        <option value="minor">Natural Minor</option>
+        <option value="pent">Minor Pentatonic</option>
+        <option value="blues">Blues</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:32px;">
+    <div class="harp-diagram" id="harpDiagram">
+      <div class="bar-track"></div>
+      <div class="end-cap end-cap-left">
+        <div class="cap-bracket"></div>
+        <div class="o-circle">O</div>
+      </div>
+      <div class="holes-row" id="holesRow"></div>
+      <div class="end-cap end-cap-right">
+        <div class="o-circle">O</div>
+        <div class="cap-bracket"></div>
+      </div>
+    </div>
+    <div class="diff-key" id="diffKey">
+      <span class="chip"><span class="swatch easy"></span>Natural notes</span>
+      <span class="chip"><span class="swatch intermediate"></span>Bends</span>
+      <span class="chip"><span class="swatch advanced"></span>Overblows / Overdraws</span>
+    </div>
+  </div>
+
+  <p class="build-heading" style="margin-top:32px;">How these scales are built</p>
+  <div id="scaleBuild"></div>
+  <div class="sb-legend">
+    <span><i class="sb-swatch sb-sw-plain"></i>unchanged</span>
+    <span><i class="sb-swatch sb-sw-flat"></i>flatted</span>
+    <span><i class="sb-swatch sb-sw-removed"></i>removed</span>
+    <span><i class="sb-swatch sb-sw-added"></i>added (the blue note)</span>
+  </div>
+
+  <p class="back"><a href="index.html">&larr; My Dashboards</a></p>
+  <footer>mike's music project — harmonica note map template</footer>
+</div>
+
+<script>
+  // CHROM index doubles as semitone value: C=0, C#/Db=1, D=2 ... B=11
+  const CHROM = ['C','C#/Db','D','D#/Eb','E','F','F#/Gb','G','G#/Ab','A','A#/Bb','B'];
+  // Flat-only spelling used just for the scale build-up rows below, matching
+  // scale-builder.html's own note names (single spelling reads cleaner in a
+  // tile grid than the diagram's dual sharp/flat labels).
+  const CHROM_FLAT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+  // Faithful reproduction of the source note-map (drawn for a C harmonica).
+  // Values are semitone offsets from the harp's own key (blow 1 = 0).
+  // topTop: only hole 10 has a second bend above "top".
+  // top: overblow (holes 1,4,5,6) or blow bend (holes 8,9,10). null = no box.
+  // bends: draw bend row(s) below the draw note, top-to-bottom as in the source chart.
+  // topType/bendType classify the TECHNIQUE (not just position) for the
+  // difficulty shading: 'overblow'/'overdraw' = advanced, 'blowbend'/
+  // 'drawbend' = intermediate. Holes 1-6 can draw-bend (intermediate) and
+  // overblow (advanced, holes 1/4/5/6 only); holes 7-10 can blow-bend
+  // (intermediate, holes 8/9/10 only -- hole 7's gap is too small to bend)
+  // and overdraw (advanced, holes 7/9/10 only).
+  const TEMPLATE = [
+    { num:1,  topTop:null, top:3,    blow:0, draw:2,  bends:[1],        topType:'overblow', bendType:'drawbend' },
+    { num:2,  topTop:null, top:null, blow:4, draw:7,  bends:[6,5],      topType:null,        bendType:'drawbend' },
+    { num:3,  topTop:null, top:null, blow:7, draw:11, bends:[10,9,8],   topType:null,        bendType:'drawbend' },
+    { num:4,  topTop:null, top:3,    blow:0, draw:2,  bends:[1],        topType:'overblow', bendType:'drawbend' },
+    { num:5,  topTop:null, top:6,    blow:4, draw:5,  bends:[],         topType:'overblow', bendType:null },
+    { num:6,  topTop:null, top:10,   blow:7, draw:9,  bends:[8],        topType:'overblow', bendType:'drawbend' },
+    { num:7,  topTop:null, top:null, blow:0, draw:11, bends:[1],        topType:null,        bendType:'overdraw' },
+    { num:8,  topTop:null, top:3,    blow:4, draw:2,  bends:[],         topType:'blowbend', bendType:null },
+    { num:9,  topTop:null, top:6,    blow:7, draw:5,  bends:[8],        topType:'blowbend', bendType:'overdraw' },
+    { num:10, topTop:10,   top:11,   blow:0, draw:9,  bends:[1],        topType:'blowbend', bendType:'overdraw' }
+  ];
+
+  const DIFF_CLASS = { overblow:'diff-advanced', overdraw:'diff-advanced', blowbend:'diff-intermediate', drawbend:'diff-intermediate' };
+
+  // Position N (1-12) = the key that's (N-1) fifths above the harp's own key,
+  // following the standard harmonica position convention (circle of fifths).
+  const ORDINALS = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
+
+  // Scale degrees as semitone offsets from the scale's own root, reusing the
+  // same major -> minor -> pentatonic -> blues logic as scale-builder.html.
+  const SCALES = {
+    major: { name:'Major',           offsets:[0,2,4,5,7,9,11],  degrees:['1','2','3','4','5','6','7'],
+      formula:'W – W – H – W – W – W – H',
+      caption:'The standard seven-note major scale.' },
+    minor: { name:'Natural Minor',   offsets:[0,2,3,5,7,8,10],  degrees:['1','2','♭3','4','5','♭6','♭7'],
+      formula:'W – H – W – W – H – W – W',
+      caption:'The major scale with the 3rd, 6th, and 7th degrees flatted a half step.' },
+    pent:  { name:'Minor Pentatonic',offsets:[0,3,5,7,10],      degrees:['1','♭3','4','5','♭7'],
+      formula:'1 – ♭3 – 4 – 5 – ♭7  (5 notes)',
+      caption:'Natural minor with the 2nd and ♭6th removed — five notes, very bend-friendly on harmonica.' },
+    blues: { name:'Blues',           offsets:[0,3,5,6,7,10],    degrees:['1','♭3','4','♭5','5','♭7'],
+      formula:'1 – ♭3 – 4 – ♭5 – 5 – ♭7  (6 notes)',
+      caption:'Minor pentatonic plus one passing tone, the ♭5, slotted between the 4 and 5.' }
+  };
+
+  const sel = document.getElementById('keySelect');
+  const positionSelectEl = document.getElementById('positionSelect');
+  const scaleSelectEl = document.getElementById('scaleSelect');
+  const scaleBuildEl = document.getElementById('scaleBuild');
+  const holesRowEl = document.getElementById('holesRow');
+  const harpDiagramEl = document.getElementById('harpDiagram');
+
+  function noteBox(semi, keyIdx, cls, matchSet, rootPitchClass){
+    if(semi === null) return `<div class="box empty"></div>`;
+    const pitchClass = (keyIdx + semi + 12) % 12;
+    const name = CHROM[pitchClass];
+    let scaleCls = '';
+    if(matchSet && matchSet.has(pitchClass)){
+      scaleCls = ' in-scale';
+      if(pitchClass === rootPitchClass) scaleCls += ' is-root';
+    }
+    return `<div class="box ${cls}${scaleCls}"><span>${name}</span></div>`;
+  }
+
+  // Builds the 12 positions for the currently selected harp key.
+  function buildPositions(harpKeyIdx){
+    const list = [];
+    for(let pos = 1; pos <= 12; pos++){
+      const rootIdx = (harpKeyIdx + (pos - 1) * 7) % 12;
+      list.push({ pos, rootIdx, rootName: CHROM[rootIdx] });
+    }
+    return list;
+  }
+
+  // Rebuilds the position dropdown for a (possibly new) harp key, keeping the
+  // same POSITION NUMBER selected rather than trying to preserve a note name
+  // (the note at a given position changes when the harp key changes).
+  function populatePositions(harpKeyIdx, keepPos){
+    const positions = buildPositions(harpKeyIdx);
+    positionSelectEl.innerHTML = positions.map(p =>
+      `<option value="${p.pos}">${p.rootName} (${ORDINALS[p.pos - 1]} position)</option>`
+    ).join('');
+    positionSelectEl.value = keepPos || 1;
+    return positions;
+  }
+
+  function computeMatchSet(rootIdx, scaleKey){
+    if(scaleKey === 'none') return null;
+    const scale = SCALES[scaleKey];
+    return new Set(scale.offsets.map(o => (rootIdx + o) % 12));
+  }
+
+  // Ported from scale-builder.html: builds Major -> Natural Minor ->
+  // Minor Pentatonic -> Blues as four progressive rows, each described
+  // relative to the one before it, for whatever root the current
+  // "Key to play" position resolves to.
+  const SB_COL_ORDER = [1,2,3,4,'b5',5,6,7];
+
+  function sbTile(html, cls){ return `<div class="sb-tile ${cls}">${html}</div>`; }
+  function sbTileContent(note, deg){ return `<span class="sb-note">${note}</span><span class="sb-deg">${deg}</span>`; }
+
+  function sbRenderRow(col){
+    return SB_COL_ORDER.map(c => {
+      const spec = col[c];
+      if(!spec || spec.state === 'empty') return `<div class="sb-tile sb-tile--empty"></div>`;
+      if(spec.state === 'removed') return sbTile(sbTileContent(spec.note, spec.deg), 'sb-tile--removed');
+      if(spec.state === 'flat')    return sbTile(sbTileContent(spec.note, spec.deg), 'sb-tile--flat');
+      if(spec.state === 'added')   return sbTile(sbTileContent(spec.note, spec.deg), 'sb-tile--added');
+      return sbTile(sbTileContent(spec.note, spec.deg), 'sb-tile--plain');
+    }).join('');
+  }
+
+  function renderScaleBuild(rootIdx){
+    const rootName = CHROM_FLAT[rootIdx];
+    const noteAt = (semis) => CHROM_FLAT[(rootIdx + semis + 12) % 12];
+    const s = {
+      major: { 1:noteAt(0), 2:noteAt(2), 3:noteAt(4), 4:noteAt(5), 5:noteAt(7), 6:noteAt(9), 7:noteAt(11) },
+      minor: { 1:noteAt(0), 2:noteAt(2), 3:noteAt(3), 4:noteAt(5), 5:noteAt(7), 6:noteAt(8), 7:noteAt(10) },
+      pent:  { 1:noteAt(0), 3:noteAt(3), 4:noteAt(5), 5:noteAt(7), 7:noteAt(10) },
+      blues: { 1:noteAt(0), 3:noteAt(3), 4:noteAt(5), b5:noteAt(6), 5:noteAt(7), 7:noteAt(10) }
+    };
+
+    const majorRow = {
+      1:{state:'plain', note:s.major[1], deg:'1'}, 2:{state:'plain', note:s.major[2], deg:'2'},
+      3:{state:'plain', note:s.major[3], deg:'3'}, 4:{state:'plain', note:s.major[4], deg:'4'},
+      'b5':{state:'empty'},
+      5:{state:'plain', note:s.major[5], deg:'5'}, 6:{state:'plain', note:s.major[6], deg:'6'},
+      7:{state:'plain', note:s.major[7], deg:'7'}
+    };
+    const minorRow = {
+      1:{state:'plain', note:s.minor[1], deg:'1'}, 2:{state:'plain', note:s.minor[2], deg:'2'},
+      3:{state:'flat',  note:s.minor[3], deg:'♭3'}, 4:{state:'plain', note:s.minor[4], deg:'4'},
+      'b5':{state:'empty'},
+      5:{state:'plain', note:s.minor[5], deg:'5'}, 6:{state:'flat',  note:s.minor[6], deg:'♭6'},
+      7:{state:'flat',  note:s.minor[7], deg:'♭7'}
+    };
+    const pentRow = {
+      1:{state:'plain',   note:s.minor[1], deg:'1'}, 2:{state:'removed', note:s.minor[2], deg:'2'},
+      3:{state:'flat',    note:s.pent[3],  deg:'♭3'}, 4:{state:'plain',   note:s.pent[4],  deg:'4'},
+      'b5':{state:'empty'},
+      5:{state:'plain',   note:s.pent[5],  deg:'5'}, 6:{state:'removed', note:s.minor[6], deg:'♭6'},
+      7:{state:'flat',    note:s.pent[7],  deg:'♭7'}
+    };
+    const bluesRow = {
+      1:{state:'plain', note:s.blues[1], deg:'1'}, 2:{state:'empty'},
+      3:{state:'flat',  note:s.blues[3], deg:'♭3'}, 4:{state:'plain', note:s.blues[4], deg:'4'},
+      'b5':{state:'added', note:s.blues['b5'], deg:'♭5'},
+      5:{state:'plain', note:s.blues[5], deg:'5'}, 6:{state:'empty'},
+      7:{state:'flat',  note:s.blues[7], deg:'♭7'}
+    };
+
+    const rows = [
+      { title:`${rootName} Major Scale`, formula:'W – W – H – W – W – W – H', grid: majorRow },
+      { title:`${rootName} Natural Minor`, formula:'Flat the 3, 6, and 7', grid: minorRow },
+      { title:`${rootName} Minor Pentatonic`, formula:'Remove the 2 and ♭6', grid: pentRow },
+      { title:`${rootName} Blues Scale`, formula:'Add the ♭5 back in', grid: bluesRow }
+    ];
+
+    scaleBuildEl.innerHTML = rows.map(r => `
+      <div class="sb-row">
+        <div class="sb-row-label">
+          <h3>${r.title}</h3>
+          <div class="sb-formula">${r.formula}</div>
+        </div>
+        <div class="sb-comb">${sbRenderRow(r.grid)}</div>
+      </div>
+    `).join('');
+  }
+
+  function render(key){
+    const keyIdx = CHROM.indexOf(key);
+    const pos = parseInt(positionSelectEl.value, 10) || 1;
+    const positionRootIdx = (keyIdx + (pos - 1) * 7) % 12;
+    const scaleKey = scaleSelectEl.value;
+    const matchSet = computeMatchSet(positionRootIdx, scaleKey);
+
+    let html = '';
+    TEMPLATE.forEach(h => {
+      html += `<div class="hole-col">`;
+      const topDiff = h.topType ? ' ' + DIFF_CLASS[h.topType] : '';
+      // three slots above the badge, always in this order: topTop, top, blow
+      html += noteBox(h.topTop, keyIdx, 'topbend' + topDiff, matchSet, positionRootIdx);
+      // when there's no topTop box above it, the "top" box is the first
+      // visible box in the stack and needs its own top border restored
+      html += noteBox(h.top, keyIdx, 'topbend' + topDiff + (h.topTop === null ? ' seam-top' : ''), matchSet, positionRootIdx);
+      html += noteBox(h.blow, keyIdx, 'blow diff-easy' + (h.topTop === null && h.top === null ? ' seam-top' : ''), matchSet, positionRootIdx);
+      html += `<div class="badge">${h.num}</div>`;
+      html += noteBox(h.draw, keyIdx, 'draw diff-easy', matchSet, positionRootIdx);
+      const bendDiff = h.bendType ? ' ' + DIFF_CLASS[h.bendType] : '';
+      h.bends.forEach(b => { html += noteBox(b, keyIdx, 'bend' + bendDiff, matchSet, positionRootIdx); });
+      html += `</div>`;
+    });
+    holesRowEl.innerHTML = html;
+    harpDiagramEl.classList.toggle('scale-active', scaleKey !== 'none');
+
+    renderScaleBuild(positionRootIdx);
+  }
+
+  CHROM.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  sel.value = 'C';
+  populatePositions(CHROM.indexOf('C'), 1);
+
+  sel.addEventListener('change', () => {
+    const keepPos = parseInt(positionSelectEl.value, 10) || 1;
+    populatePositions(CHROM.indexOf(sel.value), keepPos);
+    render(sel.value);
+  });
+  positionSelectEl.addEventListener('change', () => render(sel.value));
+  scaleSelectEl.addEventListener('change', () => render(sel.value));
+
+  render('C');
+</script>
+</body>
+</html>
