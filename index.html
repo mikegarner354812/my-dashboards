@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Dashboards</title>
+<meta name="description" content="A collection of simple browser-based tools and dashboards.">
+<style>
+:root{--bg:#faf8f4;--fg:#2a2622;--muted:#7a7268;--line:#d9d3c8;--card:#fff;--accent:#3f9b5f}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1b19;--fg:#efe9e0;--muted:#a39b90;--line:#3d3934;--card:#262320;--accent:#5bbb7d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:32px 20px}
+main{max-width:720px;margin:0 auto}
+h1{font-size:1.6rem;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 28px;font-size:1rem}
+.cards{display:grid;gap:14px}
+a.card{display:block;padding:16px 18px;background:var(--card);border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--fg)}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
+a.card h2{font-size:1.1rem;margin:0 0 4px;color:var(--accent)}
+a.card p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.45}
+footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.8rem}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <h1>My Dashboards</h1>
+  <p class="lead">Simple tools that run right in your browser. Nothing to install, and your data stays on your device.</p>
+
+  <div class="cards">
+    <a class="card" href="harmonica-bend-tracker.html">
+      <h2>Harmonica Draw Bend Tracker</h2>
+      <p>Track your progress on draw bends across every key of diatonic harmonica.</p>
+    </a>
+    <!-- To add another dashboard, copy the block above, change the link and text. -->
+  </div>
+
+  <footer>
+    <a href="https://github.com/mikegarner354812" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</main>
+</body>
+</html>
